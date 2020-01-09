@@ -1,6 +1,5 @@
 Otra tarea,Despues de index,2020-01-14
 Tarea principal,Hacer cosas,2020-01-06
-Tarea principal,Hacer cosas,
-tareita,Hacer cosas,2020-01-06
-Hola,Hacer cosas,2020-01-06
-Vacio, ,2020-01-06
+tareita,"ñalkdfj añlañld fkañalsdkf",
+Otra tarea,,2020-01-08
+Hola,l,2020-01-09

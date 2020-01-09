@@ -1,11 +1,12 @@
 from tasks import app
 from flask import render_template, request, redirect, url_for
-from tasks.forms import TaskForm
-from datetime import date
+from tasks.forms import TaskForm, ProccesTaskForm
 
 import csv
+from datetime import date
 
 DATOS = './data/tareas.txt'
+COPIA = './data/copia.txt'
 cabecera = ['title', 'description', 'date']
 
 @app.route("/")
@@ -23,6 +24,7 @@ def index():
 
 @app.route("/newtask", methods=['GET', 'POST'])
 def newTask():
+
     form = TaskForm(request.form)
 
     if request.method == 'GET':
@@ -42,33 +44,63 @@ def newTask():
         return redirect(url_for("index"))
     else:
         return render_template("task.html", form=form)
-    
-    
-@app.route("/processTask", methods=['GET', 'POST'])
-def processTask():
-    form = TaskForm(request.form)
+
+@app.route("/processtask", methods=['GET', 'POST'])
+def proccesTask():
+    form = ProccesTaskForm(request.form)
+
     if request.method == 'GET':
+        '''
+         ix = 2
+         btnBorrar
+        '''
         fdatos = open(DATOS, 'r')
-        csvreader = csvreader(fdatos, delimiter=",", quotechar='"')
-        
-        registroActivo = None
-        numLinea = 1
+        csvreader = csv.reader(fdatos, delimiter=",", quotechar='"')
+
+        registroAct = None
+        ilinea = 1
         ix = int(request.values.get('ix'))
         for linea in csvreader:
-            if numLinea == ix:
-                registroActivo = linea
+            if ilinea == ix:
+                registroAct = linea
                 break
-            numLinea += 1
+            ilinea += 1
+
+        if registroAct:
+            if registroAct[2]:
+                fechaTarea = date(int(registroAct[2][:4]), int(registroAct[2][5:7]), int(registroAct[2][8:]))
+            else:
+                fechaTarea = None
+
+            accion = ''
+
+            if 'btnModificar' in request.values:
+                accion = 'M'
             
-        if registroActivo:
-            fechaTarea = date(int(registroActivo[2][4:]), int(registroActivo[2][5:7]), int(registroActivo[2][8:]))
-            form = TaskForm(data={
-                'title':registroActivo[0],
-                'description': registroActivo[1],
-                'date': fechaTarea       
-            })
-        
-        
-        
-        return render_template("task.html", form=form)
-        
+            if 'btnBorrar' in request.values:
+                accion = 'B'
+
+
+            form = ProccesTaskForm(data={'ix': ix, 'title': registroAct[0], 'description': registroAct[1], 'date': fechaTarea, 'btn': accion})
+
+        return render_template("processtask.html", form=form)
+
+
+    if form.validate():
+        print("Modificar el fichero")
+        '''
+        Crear fichero copia vacio en escritura
+        leer y copiar todos los registros desde tareas.txt a copia.txt hasta el anterior al que vamos a modificar
+        grabar el nuevo registro con los datos del formulario
+        leer y copiar el resto de los registros hasta el final
+        cerrar los dos ficheros
+        borrar tareas.txt
+        renombrar copia.txt a tareas.txt
+        '''
+
+        original = fopen(DATOS, 'r')
+        copia = fopen(COPIA, 'w')
+
+        return redirect(url_for('index'))
+
+    return render_template("processtask.html", form=form)

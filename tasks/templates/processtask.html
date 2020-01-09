@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %} Nueva tarea {% endblock %}
+
+{% block content %}
+    <h1>Nueva tarea</h1>
+    <form action="/processtask" method="post">
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+            {{ form.ix(class="u-full-width") }}
+            {{ form.btn(class="u-full-width") }}
+        </div>
+
+        <div class="row">
+            <div class="six columns">
+                {{ form.title(class="u-full-width", placeholder="Título") }}
+                {% if form.title.errors %}
+                    {% for error in form.title.errors %}
+                        <p class='field-error'>{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div class="six columns">
+                {{ form.date(class='u-full-width', type="date") }}
+                {% if form.date.errors %}
+                    {% for error in form.date.errors %}
+                        <p class='field-error'>{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            {{ form.description(class="u-full-width", placeholder="Descripción") }}
+            {% if form.description.errors %}
+                {% for error in form.description.errors %}
+                    <p class='field-error'>{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+
+        </div>
+        {{ form.submit(class="button-primary") }}
+        <!--input type="submit" class="button-primary" value="Enviar"-->
+    </form>
+
+{% endblock %}
