@@ -1,6 +1,7 @@
 from tasks import app
 from flask import render_template, request, redirect, url_for
 from tasks.forms import TaskForm
+from datetime import date
 
 import csv
 
@@ -41,3 +42,33 @@ def newTask():
         return redirect(url_for("index"))
     else:
         return render_template("task.html", form=form)
+    
+    
+@app.route("/processTask", methods=['GET', 'POST'])
+def processTask():
+    form = TaskForm(request.form)
+    if request.method == 'GET':
+        fdatos = open(DATOS, 'r')
+        csvreader = csvreader(fdatos, delimiter=",", quotechar='"')
+        
+        registroActivo = None
+        numLinea = 1
+        ix = int(request.values.get('ix'))
+        for linea in csvreader:
+            if numLinea == ix:
+                registroActivo = linea
+                break
+            numLinea += 1
+            
+        if registroActivo:
+            fechaTarea = date(int(registroActivo[2][4:]), int(registroActivo[2][5:7]), int(registroActivo[2][8:]))
+            form = TaskForm(data={
+                'title':registroActivo[0],
+                'description': registroActivo[1],
+                'date': fechaTarea       
+            })
+        
+        
+        
+        return render_template("task.html", form=form)
+        
