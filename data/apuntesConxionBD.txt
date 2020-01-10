@@ -1,0 +1,6 @@
+#en python
+import sqlite3
+conn = sqlite3.connect('ruta...task.db')
+#crear un cursor
+c1 = conn.cursor()
+

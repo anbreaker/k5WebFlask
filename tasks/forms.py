@@ -5,6 +5,7 @@ from wtforms.widgets import TextArea
 
 from datetime import date
 
+
 def greater_than_today(form, field):
     hoy = date.today()
     if field.data < hoy:
@@ -12,17 +13,20 @@ def greater_than_today(form, field):
 
 
 class TaskForm(FlaskForm):
-    title = StringField('Título', validators=[DataRequired(), Length(min=3, max=15, message="La longitud ha de estar entre 3 y 15")])
+    title = StringField('Título', validators=[DataRequired(), Length(
+        min=3, max=15, message="La longitud ha de estar entre 3 y 15")])
     description = StringField('Descripción', widget=TextArea())
-    date = DateField('Fecha', validators=[DataRequired(), greater_than_today])
+    fx = DateField('Fecha', validators=[DataRequired(), greater_than_today])
 
     submit = SubmitField('Enviar')
+
 
 class ProccesTaskForm(FlaskForm):
     ix = HiddenField('ix', validators=[DataRequired()])
     btn = HiddenField('btn', validators=[DataRequired(), AnyOf(['M', 'B'])])
-    title = StringField('Título', validators=[DataRequired(), Length(min=3, max=15, message="La longitud ha de estar entre 3 y 15")])
+    title = StringField('Título', validators=[DataRequired(), Length(
+        min=3, max=15, message="La longitud ha de estar entre 3 y 15")])
     description = StringField('Descripción', widget=TextArea())
-    date = DateField('Fecha', validators=[DataRequired()])
+    fx = DateField('Fecha', validators=[DataRequired()])
 
     submit = SubmitField('Aceptar')

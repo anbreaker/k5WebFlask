@@ -3,7 +3,12 @@
 {% block title %} Nueva tarea {% endblock %}
 
 {% block content %}
-    <h1>Nueva tarea</h1>
+    {% if form.btn.data == 'M' %}
+        <h1>Modificar tarea</h1>
+    {% endif %}
+    {% if form.btn.data == 'B' %}
+        <h1>Borrar tarea</h1>
+    {% endif %}
     <form action="/processtask" method="post">
         {{ form.hidden_tag() }}
 
@@ -22,9 +27,9 @@
                 {% endif %}
             </div>
             <div class="six columns">
-                {{ form.date(class='u-full-width', type="date") }}
-                {% if form.date.errors %}
-                    {% for error in form.date.errors %}
+                {{ form.fx(class='u-full-width', type="date") }}
+                {% if form.fx.errors %}
+                    {% for error in form.fx.errors %}
                         <p class='field-error'>{{ error }}</p>
                     {% endfor %}
                 {% endif %}
