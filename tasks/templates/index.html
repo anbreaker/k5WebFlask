@@ -14,7 +14,7 @@
             </tr>
             {% for tarea in registros %}
             <tr>
-                <td><input type="radio" name="ix" value="{{loop.index}}" ></td>
+                <td><input type="radio" name="ix" value="{{tarea[3]}}" ></td>
                 <td>{{tarea[0]}}</td>
                 <td>{{tarea[1]}}</td>
                 <td>{{tarea[2]}}</td>

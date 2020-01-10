@@ -30,8 +30,31 @@ def renameFiles(DATOS, COPIA):
     os.rename(COPIA, DATOS)
 
 
-@app.route("/")
-def index():
+def todasTareasDB():
+    conn = sqlite3.connect(BASE_DATOS)
+    cursor = conn.cursor()
+    consulta = 'SELECT titulo, descripcion, fecha, id FROM tareas;'
+    rows = cursor.execute(consulta)
+    filas = []
+    for row in rows:
+        filas.append(row)
+    
+    print(filas)
+    conn.close()
+    return filas
+
+def addTaskDB(title, description, fx):
+    conn = sqlite3.connect(BASE_DATOS)
+    cursor = conn.cursor()
+    consulta = '''
+        INSERT INTO tareas (titulo, descripcion, fecha)
+                    VALUES (?, ?, ?);
+    '''
+    cursor.execute(consulta, (title, description, fx))
+    conn.commit()
+    conn.close()
+
+def todasTareas():
     fdatos = open(DATOS, 'r')
     csvreader = csv.reader(fdatos, delimiter=",", quotechar='"')
 
@@ -40,28 +63,81 @@ def index():
         registros.append(linea)
 
     fdatos.close()
+    return registros
+
+
+def addTask(title, desc, fx):
+    fdatos = open(DATOS, 'a')
+    csvwriter = csv.writer(fdatos, delimiter=",", quotechar='"')
+    csvwriter.writerow([title, desc, fx])
+    fdatos.close()
+
+
+def leeTask(ix):
+    fdatos = open(DATOS, 'r')
+    csvreader = csv.reader(fdatos, delimiter=",", quotechar='"')
+
+    registroAct = None
+
+    ix = int(ix)
+    for ilinea, linea in enumerate(csvreader, start=1):
+        if ilinea == ix:
+            registroAct = linea
+            break
+
+    return registroAct
+
+
+def borraTask(ix):
+    return modTask(ix, True)
+
+
+def modTask(ix, borra=False):
+    original, copia = openFiles(DATOS, COPIA)
+    csvreader = csv.reader(original, delimiter=",", quotechar='"')
+    for ilinea, linea in enumerate(csvreader, start=1):
+        csvwriter = csv.writer(copia, delimiter=",",
+                               quotechar='"', lineterminator='\r')
+
+        if ilinea == ix:
+            if not borra:
+                title = request.values.get('title')
+                desc = request.values.get('description')
+                fx = request.values.get('fx')
+                csvwriter.writerow([title, desc, fx])
+        else:
+            title = linea[0]
+            desc = linea[1]
+            fx = linea[2]
+            csvwriter.writerow([title, desc, fx])
+    closeFiles(original, copia)
+    renameFiles(DATOS, COPIA)
+
+
+@app.route("/")
+def index():
+    #Para ficheros
+    #registros = todasTareas()
+    registros = todasTareasDB()
     return render_template("index.html", registros=registros)
 
 
 @app.route("/newtask", methods=['GET', 'POST'])
 def newTask():
-
     form = TaskForm(request.form)
 
     if request.method == 'GET':
         return render_template("task.html", form=form)
 
     if form.validate():
-        fdatos = open(DATOS, 'a')
-        csvwriter = csv.writer(fdatos, delimiter=",", quotechar='"')
-
         title = request.values.get('title')
         desc = request.values.get('description')
-        date = request.values.get('fx')
+        fx = request.values.get('fx')
 
-        csvwriter.writerow([title, desc, date])
+        #Para ficheros
+        # addTask(title, desc, fx)
+        addTaskDB(title, desc, fx)
 
-        fdatos.close()
         return redirect(url_for("index"))
     else:
         return render_template("task.html", form=form)
@@ -72,24 +148,9 @@ def proccesTask():
     form = ProccesTaskForm(request.form)
 
     if request.method == 'GET':
-        '''
-         ix = 2
-         btnBorrar
-        '''
-        fdatos = open(DATOS, 'r')
-        csvreader = csv.reader(fdatos, delimiter=",", quotechar='"')
-
-        registroAct = None
-        ilinea = 1
-
         ix = request.values.get('ix')
         if ix:
-            ix = int(ix)
-            for linea in csvreader:
-                if ilinea == ix:
-                    registroAct = linea
-                    break
-                ilinea += 1
+            registroAct = leeTask(ix)
 
             if registroAct:
                 if registroAct[2]:
@@ -114,45 +175,14 @@ def proccesTask():
             return redirect(url_for("index"))
 
     if form.btn.data == 'B':
-        original, copia = openFiles(DATOS, COPIA)
-        csvreader = csv.reader(original, delimiter=",", quotechar='"')
         ix = int(request.values.get('ix'))
-        for ilinea, linea in enumerate(csvreader, start=1):
-            csvwriter = csv.writer(copia, delimiter=",",
-                                   quotechar='"', lineterminator='\r')
+        borraTask(ix)
 
-            if ilinea == ix:
-                pass
-            else:
-                title = linea[0]
-                desc = linea[1]
-                fx = linea[2]
-                csvwriter.writerow([title, desc, fx])
-        closeFiles(original, copia)
-        renameFiles(DATOS, COPIA)
         return redirect(url_for('index'))
 
     if form.btn.data == 'M':
         if form.validate():
-
-            original, copia = openFiles(DATOS, COPIA)
-            csvreader = csv.reader(original, delimiter=",", quotechar='"')
             ix = int(request.values.get('ix'))
-            for ilinea, linea in enumerate(csvreader, start=1):
-                csvwriter = csv.writer(
-                    copia, delimiter=",", quotechar='"', lineterminator='\r')
-
-                if ilinea == ix:
-                    title = request.values.get('title')
-                    desc = request.values.get('description')
-                    fx = request.values.get('fx')
-                    csvwriter.writerow([title, desc, fx])
-                else:
-                    title = linea[0]
-                    desc = linea[1]
-                    fx = linea[2]
-                    csvwriter.writerow([title, desc, fx])
-            closeFiles(original, copia)
-            renameFiles(DATOS, COPIA)
+            modTask(ix)
             return redirect(url_for("index"))
         return render_template("processtask.html", form=form)
