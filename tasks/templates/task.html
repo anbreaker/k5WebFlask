@@ -3,9 +3,20 @@
 {% block title %} Nueva tarea {% endblock %}
 
 {% block content %}
-    <h1>Nueva tarea</h1>
-    <form action="/newtask" method="post">
+    {% if form.btn.data == 'M' %}
+        <h1>Modificar tarea</h1>
+    {% endif %}
+    {% if form.btn.data == 'B' %}
+        <h1>Borrar tarea</h1>
+    {% endif %}
+    <form action="/processtask" method="post">
         {{ form.hidden_tag() }}
+
+        <div class="row">
+            {{ form.ix(class="u-full-width") }}
+            {{ form.btn(class="u-full-width") }}
+        </div>
+
         <div class="row">
             <div class="six columns">
                 {{ form.title(class="u-full-width", placeholder="Título") }}
