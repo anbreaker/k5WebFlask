@@ -53,6 +53,43 @@ def addTaskDB(title, description, fx):
     cursor.execute(consulta, (title, description, fx))
     conn.commit()
     conn.close()
+    
+def borraTaskDB(id):
+    conn = sqlite3.connect(BASE_DATOS)
+    cursor = conn.cursor()
+    consulta = '''
+        DELETE FROM tareas
+            WHERE id = ?;
+    '''
+    #La base de datos espera una tupla en python las tuplas de unitarias precisas de 
+    #la coma al final. (a,)
+    '''
+    >>> a = 'hola'
+    >>> a
+    'hola'
+    >>> (a)
+    'hola'
+    >>> (a,)
+    ('hola',)
+    '''
+    
+    cursor.execute(consulta, (id,))
+    conn.commit()
+    conn.close()
+    
+def leeTaskDB(id):
+    conn = sqlite3.connect(BASE_DATOS)
+    cursor = conn.cursor()
+    consulta = '''
+        SELECT titulo, descripcion, fecha, id FROM tareas
+            WHERE id = ?;
+    '''
+    rows = cursor.execute(consulta, (id)).fetchall()
+    
+    cursor.execute(consulta, (id,))
+    conn.commit()
+    conn.close()
+    return rows
 
 def todasTareas():
     fdatos = open(DATOS, 'r')
@@ -150,7 +187,12 @@ def proccesTask():
     if request.method == 'GET':
         ix = request.values.get('ix')
         if ix:
-            registroAct = leeTask(ix)
+            # Para ficheros
+            # registroAct = leeTask(ix)
+            filas = leeTaskDB(ix)
+            print(f'\n\nVer que hay aqui--> {filas}\n\n')
+            if len(filas) > 0:
+                registroAct = filas[0]
 
             if registroAct:
                 if registroAct[2]:
@@ -176,7 +218,9 @@ def proccesTask():
 
     if form.btn.data == 'B':
         ix = int(request.values.get('ix'))
-        borraTask(ix)
+        # Para Ficheros
+        # borraTask(ix)
+        borraTaskDB(ix)
 
         return redirect(url_for('index'))
 
