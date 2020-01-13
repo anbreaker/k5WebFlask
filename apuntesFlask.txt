@@ -42,5 +42,15 @@ nmap localhost
 #Para cerrar algún puerto:
 fuser -k "NºPuerto"/tcp
 
+#Montar servidor en aws
+#Permiso chmod 400 a la key.pem creada en aws (la clave publica ssh)
+ssh -i awsFlask.pem ubuntu@"Direccion ip"
+#para el usuario de desarrolo
+sudo -u task -i
+
+#instalacion de programas neesarios
+sudo apt-get update
+sudo apt-get install -y nginx git circus build-essential zlib1g-dev libssl-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev gunicorn curl sqlite3
+
 
 
